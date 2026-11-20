@@ -1,515 +1,69 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f7f3">
-  <title>Daylist — a little more done</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-synthesis: none;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      --page: #f7f7f3;
-      --surface: #fff;
-      --ink: #20231f;
-      --muted: #858980;
-      --line: #e9eae4;
-      --accent: #46795b;
-      --accent-soft: #e7f0e9;
-      --shadow: 0 18px 48px rgb(30 39 29 / 7%), 0 2px 6px rgb(30 39 29 / 3%);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --page: #171a17;
-        --surface: #202420;
-        --ink: #edf0e9;
-        --muted: #a0a79d;
-        --line: #343a34;
-        --accent: #91c69d;
-        --accent-soft: #2b3c30;
-        --shadow: 0 18px 48px rgb(0 0 0 / 22%), 0 2px 6px rgb(0 0 0 / 14%);
-      }
-
-      :root { color-scheme: dark; }
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      min-width: 320px;
-      min-height: 100vh;
-      margin: 0;
-      padding: 72px 22px 48px;
-      background:
-        radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 46%),
-        var(--page);
-      color: var(--ink);
-      font-size: 15px;
-      line-height: 1.5;
-    }
-
-    button, input { font: inherit; }
-    button { color: inherit; }
-
-    .app {
-      width: min(100%, 480px);
-      margin: 0 auto;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 38px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 650;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-    }
-
-    .brand-mark {
-      display: grid;
-      width: 28px;
-      height: 28px;
-      place-items: center;
-      border-radius: 9px;
-      background: var(--accent);
-      color: var(--surface);
-    }
-
-    .brand-mark svg { width: 17px; height: 17px; }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(32px, 8vw, 40px);
-      font-weight: 650;
-      letter-spacing: -.055em;
-      line-height: 1.1;
-    }
-
-    .subtitle {
-      margin: 10px 0 27px;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .composer {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 60px;
-      padding: 8px 9px 8px 18px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      transition: border-color .2s, box-shadow .2s;
-    }
-
-    .composer:focus-within {
-      border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent), var(--shadow);
-    }
-
-    .composer-icon {
-      display: grid;
-      flex: 0 0 auto;
-      width: 25px;
-      height: 25px;
-      place-items: center;
-      border: 1.5px solid var(--line);
-      border-radius: 50%;
-      color: var(--muted);
-    }
-
-    .composer-icon svg { width: 13px; height: 13px; }
-
-    #task-input {
-      min-width: 0;
-      flex: 1;
-      padding: 8px 0;
-      border: 0;
-      outline: 0;
-      background: transparent;
-      color: var(--ink);
-      font-size: 15px;
-    }
-
-    #task-input::placeholder { color: #a4a99f; }
-
-    .add-button {
-      display: grid;
-      flex: 0 0 auto;
-      width: 40px;
-      height: 40px;
-      place-items: center;
-      border: 0;
-      border-radius: 12px;
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      transition: transform .18s, filter .18s;
-    }
-
-    .add-button:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .add-button:active { transform: scale(.95); }
-    .add-button svg { width: 18px; height: 18px; }
-
-    .list-card {
-      overflow: hidden;
-      margin-top: 20px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .list-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 17px 20px 14px;
-    }
-
-    .list-heading {
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-    }
-
-    .date-label {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .task-list {
-      min-height: 180px;
-      margin: 0;
-      padding: 0 10px;
-      list-style: none;
-    }
-
-    .task-item {
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      min-height: 60px;
-      padding: 9px 10px;
-      border-top: 1px solid var(--line);
-      animation: arrive .25s ease both;
-    }
-
-    @keyframes arrive {
-      from { opacity: 0; transform: translateY(7px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .check-wrap {
-      position: relative;
-      display: grid;
-      flex: 0 0 auto;
-      width: 24px;
-      height: 24px;
-      place-items: center;
-      cursor: pointer;
-    }
-
-    .check-wrap input {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    .checkmark {
-      display: grid;
-      width: 21px;
-      height: 21px;
-      place-items: center;
-      border: 1.5px solid #cdd1c8;
-      border-radius: 7px;
-      color: transparent;
-      transition: background .2s, border-color .2s, color .2s, transform .2s;
-    }
-
-    .checkmark svg { width: 13px; height: 13px; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset .24s ease .04s; }
-    .check-wrap:hover .checkmark { border-color: var(--accent); transform: scale(1.06); }
-    .check-wrap input:focus-visible + .checkmark { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 3px; }
-    .check-wrap input:checked + .checkmark { border-color: var(--accent); background: var(--accent); color: #fff; transform: scale(1); }
-    .check-wrap input:checked + .checkmark svg { stroke-dashoffset: 0; }
-
-    .task-title {
-      min-width: 0;
-      flex: 1;
-      overflow-wrap: anywhere;
-      transition: color .22s;
-    }
-
-    .task-item.done .task-title {
-      color: var(--muted);
-      text-decoration: line-through;
-      text-decoration-color: color-mix(in srgb, var(--muted) 65%, transparent);
-    }
-
-    .delete-button {
-      display: grid;
-      flex: 0 0 auto;
-      width: 34px;
-      height: 34px;
-      place-items: center;
-      border: 0;
-      border-radius: 9px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      opacity: 0;
-      transition: background .18s, color .18s, opacity .18s, transform .18s;
-    }
-
-    .task-item:hover .delete-button,
-    .delete-button:focus-visible { opacity: 1; }
-    .delete-button:hover { background: color-mix(in srgb, #cc665d 12%, transparent); color: #c65e55; }
-    .delete-button:active { transform: scale(.9); }
-    .delete-button svg { width: 17px; height: 17px; }
-
-    .empty-state {
-      display: grid;
-      min-height: 180px;
-      place-content: center;
-      justify-items: center;
-      gap: 7px;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .empty-icon { color: color-mix(in srgb, var(--accent) 75%, var(--muted)); }
-    .empty-icon svg { width: 27px; height: 27px; }
-    .empty-state strong { color: var(--ink); font-size: 14px; font-weight: 600; }
-    .empty-state span { font-size: 13px; }
-
-    .list-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-height: 51px;
-      padding: 10px 20px;
-      border-top: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .clear-button {
-      padding: 5px 0;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      transition: color .18s;
-    }
-
-    .clear-button:hover { color: var(--accent); }
-    .clear-button:disabled { visibility: hidden; }
-
-    .hint {
-      margin: 19px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .hint kbd {
-      padding: 2px 5px;
-      border: 1px solid var(--line);
-      border-radius: 5px;
-      background: var(--surface);
-      font: inherit;
-      font-size: 11px;
-    }
-
-    button:focus-visible {
-      outline: 3px solid color-mix(in srgb, var(--accent) 38%, transparent);
-      outline-offset: 3px;
-    }
-
-    @media (max-width: 520px) {
-      body { padding: 45px 17px 32px; }
-      .brand { margin-bottom: 31px; }
-      .delete-button { opacity: .7; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>jurusan sija</title>
 </head>
 <body>
-  <main class="app">
-    <div class="brand">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
-      </span>
-      Daylist
-    </div>
 
-    <h1>A little more done.</h1>
-    <p class="subtitle">Make space for what matters today.</p>
+    <h1>Jurusan SIJA: Membangun Generasi Ahli Teknologi Masa Depan</h1>
 
-    <form class="composer" id="task-form" autocomplete="off">
-      <span class="composer-icon" aria-hidden="true">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>
-      </span>
-      <input id="task-input" name="task" type="text" maxlength="160" placeholder="Add a task…" aria-label="New task" required>
-      <button class="add-button" type="submit" aria-label="Add task">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>
-      </button>
-    </form>
+<p>
+    SIJA (Sistem Informasi, Jaringan, dan Aplikasi) merupakan salah satu jurusan di
+    Sekolah Menengah Kejuruan (SMK) yang berfokus pada bidang teknologi informasi
+    dan komunikasi. Jurusan ini mempelajari cara kerja komputer, jaringan, sistem
+    informasi, serta pengembangan aplikasi yang banyak digunakan dalam kehidupan
+    sehari-hari maupun dunia industri. Siswa dibimbing untuk memahami konsep dasar
+    hingga praktik secara langsung sehingga memiliki kemampuan yang siap digunakan
+    di dunia kerja.
+</p>
 
-    <section class="list-card" aria-label="Your tasks">
-      <header class="list-header">
-        <span class="list-heading">Your list</span>
-        <time class="date-label" id="today"></time>
-      </header>
-      <ul class="task-list" id="task-list" aria-live="polite"></ul>
-      <footer class="list-footer">
-        <span id="task-count"></span>
-        <button class="clear-button" id="clear-completed" type="button">Clear completed</button>
-      </footer>
-    </section>
+<p>
+    Fokus pembelajaran di jurusan SIJA meliputi pemrograman komputer, pembuatan
+    website, pengembangan aplikasi, administrasi sistem jaringan, konfigurasi server,
+    keamanan jaringan, basis data, cloud computing, serta Internet of Things (IoT).
+    Selain mempelajari teori di kelas, siswa juga melakukan banyak kegiatan praktik
+    di laboratorium komputer menggunakan perangkat keras dan perangkat lunak yang
+    sesuai dengan standar industri. Hal ini bertujuan agar siswa memiliki pengalaman
+    dan keterampilan yang dibutuhkan oleh perusahaan maupun instansi.
+</p>
 
-    <p class="hint">A fresh start, one task at a time <kbd>↵</kbd></p>
-  </main>
+<p>
+    Lulusan jurusan SIJA memiliki peluang karier yang sangat luas karena kebutuhan
+    tenaga kerja di bidang teknologi informasi terus meningkat. Lulusan dapat bekerja
+    sebagai programmer, web developer, teknisi komputer, administrator jaringan,
+    database administrator, IT support, maupun cyber security. Selain itu, lulusan
+    juga memiliki kesempatan untuk menjadi wirausaha di bidang teknologi atau
+    melanjutkan pendidikan ke perguruan tinggi pada program studi Informatika,
+    Sistem Informasi, Teknik Komputer, dan bidang teknologi lainnya.
+</p>
 
-  <script>
-    (() => {
-      const STORAGE_KEY = "daylist.tasks.v1";
-      const examples = [
-        { id: "example-1", title: "Plan the week ahead", done: false },
-        { id: "example-2", title: "Take a proper lunch break", done: false },
-        { id: "example-3", title: "Reply to Sam about Saturday", done: false }
-      ];
-      const list = document.querySelector("#task-list");
-      const form = document.querySelector("#task-form");
-      const input = document.querySelector("#task-input");
-      const count = document.querySelector("#task-count");
-      const clearButton = document.querySelector("#clear-completed");
+    <h2>Tentang Sekolah</h2>
 
-      function loadTasks() {
-        try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved === null) return examples;
-          const tasks = JSON.parse(saved);
-          if (!Array.isArray(tasks)) throw new Error("Saved tasks are not a list.");
-          return tasks.filter(task =>
-            task && typeof task.id === "string" &&
-            typeof task.title === "string" &&
-            typeof task.done === "boolean"
-          );
-        } catch (error) {
-          console.error("Could not load saved tasks.", error);
-          return examples;
-        }
-      }
+    <p>SMK Negeri 9 Bandar Lampung merupakan sekolah menengah kejuruan yang berfokus pada pengembangan kompetensi siswa agar siap memasuki dunia kerja maupun melanjutkan pendidikan ke jenjang yang lebih tinggi. Sekolah ini memiliki berbagai jurusan yang sesuai dengan kebutuhan industri.</p>
 
-      let tasks = loadTasks();
+    <h2>Fasilitas Laboratorium SIJA</h2>
+    <ul>
+        <li>Laboratorium Komputer</li>
+        <li>Laboratorium Jaringan</li>
+        <li>Laboratorium Server</li>
+        <li>Ruang Praktik Pemrograman</li>
+        <li>Laboratorium Internet of Things (IoT)</li>
+    </ul>
 
-      function saveTasks() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-        } catch (error) {
-          console.error("Could not save tasks to localStorage.", error);
-        }
-      }
+    <h2>Mata Pelajaran Produktif SIJA</h2>
+    <ol>
+        <li>Pemrograman Dasar</li>
+        <li>Basis Data</li>
+        <li>Administrasi Sistem Jaringan</li>
+        <li>Pemrograman Web</li>
+        <li>Keamanan Jaringan</li>
+    </ol>
 
-      function render() {
-        list.replaceChildren();
-        if (tasks.length === 0) {
-          const empty = document.createElement("li");
-          empty.className = "empty-state";
-          empty.innerHTML = '<span class="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m2 6 1 1 2-2m-3 7 1 1 2-2m-3 7 1 1 2-2"/></svg></span><strong>Nothing on your list</strong><span>Add a task and make it happen.</span>';
-          list.append(empty);
-        } else {
-          for (const task of tasks) {
-            const item = document.createElement("li");
-            item.className = `task-item${task.done ? " done" : ""}`;
+    <p>
+        Website resmi sekolah:
+        <a href="https://smkn9bdl.com/" target="_blank">SMK Negeri 9 Bandar Lampung</a>
+    </p>
 
-            const label = document.createElement("label");
-            label.className = "check-wrap";
-            label.setAttribute("aria-label", `${task.done ? "Mark incomplete" : "Complete"}: ${task.title}`);
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.checked = task.done;
-            checkbox.setAttribute("aria-label", `Complete ${task.title}`);
-            checkbox.addEventListener("change", () => {
-              task.done = checkbox.checked;
-              saveTasks();
-              render();
-            });
-
-            const checkmark = document.createElement("span");
-            checkmark.className = "checkmark";
-            checkmark.setAttribute("aria-hidden", "true");
-            checkmark.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 3.2 3.2L13 4.5"/></svg>';
-            label.append(checkbox, checkmark);
-
-            const title = document.createElement("span");
-            title.className = "task-title";
-            title.textContent = task.title;
-
-            const remove = document.createElement("button");
-            remove.className = "delete-button";
-            remove.type = "button";
-            remove.setAttribute("aria-label", `Delete ${task.title}`);
-            remove.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4.5 6h11M8 6V4.5h4V6m2.5 0-.6 10H6.1L5.5 6m2.8 3v4m3.4-4v4"/></svg>';
-            remove.addEventListener("click", () => {
-              tasks = tasks.filter(entry => entry.id !== task.id);
-              saveTasks();
-              render();
-            });
-
-            item.append(label, title, remove);
-            list.append(item);
-          }
-        }
-
-        const remaining = tasks.filter(task => !task.done).length;
-        count.textContent = `${remaining} ${remaining === 1 ? "task" : "tasks"} left`;
-        clearButton.disabled = !tasks.some(task => task.done);
-      }
-
-      form.addEventListener("submit", event => {
-        event.preventDefault();
-        const title = input.value.trim();
-        if (!title) return;
-        tasks.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, title, done: false });
-        saveTasks();
-        render();
-        input.value = "";
-        input.focus();
-      });
-
-      clearButton.addEventListener("click", () => {
-        tasks = tasks.filter(task => !task.done);
-        saveTasks();
-        render();
-      });
-
-      document.querySelector("#today").textContent = new Intl.DateTimeFormat(undefined, {
-        weekday: "short", month: "short", day: "numeric"
-      }).format(new Date());
-      render();
-    })();
-  </script>
 </body>
 </html>
